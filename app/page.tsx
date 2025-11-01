@@ -1,6 +1,10 @@
 "use client";
 
-import { useAppSelector } from "@/lib/hooks";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchInvoices } from "@/lib/features/invoice/invoiceSlice";
+import { fetchCustomers } from "@/lib/features/customer/customerSlice";
+import { fetchVehicles } from "@/lib/features/vehicle/vehicleSlice";
 import DashboardLayout from "@/components/dashboard/dashboard-layout";
 import {
   Card,
@@ -9,47 +13,105 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TrendingUp, Wallet, Activity, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Users, Truck, IndianRupee, TrendingUp, Package } from "lucide-react";
 
 export default function Home() {
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { invoices } = useAppSelector((state) => state.invoice);
+  const { customers } = useAppSelector((state) => state.customer);
+  const { vehicles } = useAppSelector((state) => state.vehicle);
+
+  useEffect(() => {
+    dispatch(fetchInvoices({ page: 1, limit: 100 }));
+    dispatch(fetchCustomers());
+    dispatch(fetchVehicles());
+  }, [dispatch]);
+
+  // Calculate statistics
+  const totalRevenue = invoices.reduce((sum, invoice) => {
+    const invoiceTotal = invoice.rows.reduce((rowSum, row) => rowSum + row.total, 0);
+    return sum + invoiceTotal;
+  }, 0);
+
+  const paidInvoices = invoices.filter((inv) => inv.status === "Paid");
+  const unpaidInvoices = invoices.filter((inv) => inv.status === "Unpaid");
+  const partiallyPaidInvoices = invoices.filter((inv) => inv.status === "Partially Paid");
+
+  const paidRevenue = paidInvoices.reduce((sum, invoice) => {
+    const invoiceTotal = invoice.rows.reduce((rowSum, row) => rowSum + row.total, 0);
+    return sum + invoiceTotal;
+  }, 0);
+
+  const pendingRevenue = totalRevenue - paidRevenue;
+
+  const recentInvoices = [...invoices]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
 
   const stats = [
     {
-      title: "Total Balance",
-      value: "$24,500.00",
-      description: "+12.5% from last month",
-      icon: DollarSign,
+      title: "Total Invoices",
+      value: invoices.length.toString(),
+      description: `${paidInvoices.length} paid, ${unpaidInvoices.length} pending`,
+      icon: FileText,
     },
     {
-      title: "Active Trades",
-      value: "12",
-      description: "3 pending executions",
-      icon: Activity,
+      title: "Total Customers",
+      value: customers.length.toString(),
+      description: "Active customers",
+      icon: Users,
     },
     {
-      title: "Portfolio Value",
-      value: "$89,432.00",
-      description: "+8.2% this week",
-      icon: Wallet,
+      title: "Total Vehicles",
+      value: vehicles.length.toString(),
+      description: "Fleet size",
+      icon: Truck,
     },
     {
-      title: "Today's Profit",
-      value: "+$2,345.67",
-      description: "+5.4% increase",
-      icon: TrendingUp,
+      title: "Total Revenue",
+      value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
+      description: `₹${pendingRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} pending`,
+      icon: IndianRupee,
     },
   ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Paid":
+        return "bg-green-100 text-green-800 hover:bg-green-100";
+      case "Unpaid":
+        return "bg-red-100 text-red-800 hover:bg-red-100";
+      case "Partially Paid":
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100";
+      default:
+        return "bg-gray-100 text-gray-800 hover:bg-gray-100";
+    }
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const getCustomerName = (customerId: any) => {
+    if (typeof customerId === "string") return "";
+    return customerId?.name || "";
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(" ")[0] || "Trader"}!
+            Welcome back, {user?.name?.split(" ")[0] || "User"}!
           </h2>
           <p className="text-muted-foreground">
-            Here's what's happening with your trades today.
+            Here's an overview of your transport business.
           </p>
         </div>
 
@@ -78,87 +140,103 @@ export default function Home() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
+              <CardTitle>Recent Invoices</CardTitle>
               <CardDescription>
-                Your latest trades and transactions.
+                Latest {recentInvoices.length} invoices from your business.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-4">
-                  <div>
-                    <p className="font-medium">BTC/USD Long</p>
-                    <p className="text-sm text-muted-foreground">2 hours ago</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">+$234.50</p>
-                    <p className="text-sm text-muted-foreground">+2.3%</p>
-                  </div>
+              {recentInvoices.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No invoices yet. Create your first invoice to get started.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {recentInvoices.map((invoice) => {
+                    const total = invoice.rows.reduce((sum, row) => sum + row.total, 0);
+                    const customerName = getCustomerName(invoice.customerId) || invoice.customerName;
+                    
+                    return (
+                      <div key={invoice._id} className="flex items-center justify-between border-b pb-4 last:border-0">
+                        <div className="space-y-1">
+                          <p className="font-medium text-sm">{invoice.invoiceId}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {customerName} • {formatDate(invoice.date)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {invoice.from} → {invoice.to}
+                          </p>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <p className="font-semibold text-sm">₹{total.toLocaleString('en-IN')}</p>
+                          <Badge className={getStatusColor(invoice.status)} variant="secondary">
+                            {invoice.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex items-center justify-between border-b pb-4">
-                  <div>
-                    <p className="font-medium">ETH/USD Short</p>
-                    <p className="text-sm text-muted-foreground">5 hours ago</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-red-600">-$89.20</p>
-                    <p className="text-sm text-muted-foreground">-1.2%</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">XRP/USD Long</p>
-                    <p className="text-sm text-muted-foreground">1 day ago</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-green-600">+$567.80</p>
-                    <p className="text-sm text-muted-foreground">+4.5%</p>
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
           <Card className="col-span-3">
             <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
+              <CardTitle>Revenue Overview</CardTitle>
               <CardDescription>
-                Your trading performance overview.
+                Payment status breakdown.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Win Rate</span>
-                  <span className="text-sm font-bold">68.5%</span>
+                  <span className="text-sm font-medium">Paid</span>
+                  <span className="text-sm font-bold text-green-600">
+                    ₹{paidRevenue.toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{paidInvoices.length} invoices</span>
+                  <span>
+                    {totalRevenue > 0 ? ((paidRevenue / totalRevenue) * 100).toFixed(1) : 0}%
+                  </span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-green-500"
-                    style={{ width: "68.5%" }}
+                    style={{
+                      width: totalRevenue > 0 ? `${(paidRevenue / totalRevenue) * 100}%` : '0%',
+                    }}
                   />
                 </div>
               </div>
+              
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Avg. Profit</span>
-                  <span className="text-sm font-bold text-green-600">
-                    +3.2%
+                  <span className="text-sm font-medium">Pending</span>
+                  <span className="text-sm font-bold text-red-600">
+                    ₹{pendingRevenue.toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{unpaidInvoices.length + partiallyPaidInvoices.length} invoices</span>
+                  <span>
+                    {totalRevenue > 0 ? ((pendingRevenue / totalRevenue) * 100).toFixed(1) : 0}%
                   </span>
                 </div>
               </div>
-              <div className="space-y-2">
+
+              <div className="pt-4 border-t space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Total Trades</span>
-                  <span className="text-sm font-bold">247</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Best Day</span>
-                  <span className="text-sm font-bold text-green-600">
-                    +$1,234.50
+                  <span className="text-sm font-medium">Total Revenue</span>
+                  <span className="text-sm font-bold">
+                    ₹{totalRevenue.toLocaleString('en-IN')}
                   </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total Invoices</span>
+                  <span className="text-sm font-bold">{invoices.length}</span>
                 </div>
               </div>
             </CardContent>
