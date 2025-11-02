@@ -85,7 +85,7 @@ export default function InvoiceFormDrawer({
       product: "",
       hsnNo: "",
       truckNo: "",
-      articles: "",
+      articles: "bag", // ✅ Default value set to "bag"
       weight: 0,
       rate: 0,
       cgstSgst: 0,
@@ -159,7 +159,7 @@ export default function InvoiceFormDrawer({
           product: "",
           hsnNo: "",
           truckNo: "",
-          articles: "",
+          articles: "bag", // ✅ Default value set to "bag"
           weight: 0,
           rate: 0,
           cgstSgst: 0,
@@ -173,13 +173,31 @@ export default function InvoiceFormDrawer({
   }, [invoice, dispatch, open, customers, dataLoaded]);
 
   const handleCustomerChange = (customerId: string) => {
-    setFormData({ ...formData, customerId });
-
-    // Find selected customer and set their products
+    // Find selected customer
     const selectedCustomer = customers.find((c) => c._id === customerId);
-    if (selectedCustomer && selectedCustomer.products) {
-      setCustomerProducts(selectedCustomer.products);
+
+    if (selectedCustomer) {
+      // Auto-populate taluka, district, consignor, and consignee from customer
+      setFormData({
+        ...formData,
+        customerId,
+        taluka: selectedCustomer.taluka || "",
+        dist: selectedCustomer.district || "",
+        consignor:
+          selectedCustomer.consignors && selectedCustomer.consignors.length > 0
+            ? selectedCustomer.consignors[0]
+            : "",
+        consignee: selectedCustomer.name, // ✅ Auto-fill consignee with customer name
+      });
+
+      // Set customer products
+      if (selectedCustomer.products) {
+        setCustomerProducts(selectedCustomer.products);
+      } else {
+        setCustomerProducts([]);
+      }
     } else {
+      setFormData({ ...formData, customerId });
       setCustomerProducts([]);
     }
   };
@@ -240,7 +258,7 @@ export default function InvoiceFormDrawer({
         product: "",
         hsnNo: "",
         truckNo: "",
-        articles: "",
+        articles: "bag", // ✅ Default value set to "bag"
         weight: 0,
         rate: 0,
         cgstSgst: 0,
@@ -429,12 +447,35 @@ export default function InvoiceFormDrawer({
                     </div>
                     <div>
                       <label className="text-sm font-medium">Consignor *</label>
-                      <Input
-                        name="consignor"
-                        value={formData.consignor}
-                        onChange={handleChange}
-                        required
-                      />
+                      {formData.customerId && customerProducts.length > 0 ? (
+                        <Select
+                          value={formData.consignor}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, consignor: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select consignor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {customers
+                              .find((c) => c._id === formData.customerId)
+                              ?.consignors?.map((consignor, idx) => (
+                                <SelectItem key={idx} value={consignor}>
+                                  {consignor}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          name="consignor"
+                          value={formData.consignor}
+                          onChange={handleChange}
+                          required
+                          placeholder="Enter consignor name"
+                        />
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium">Consignee *</label>

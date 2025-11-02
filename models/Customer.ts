@@ -8,7 +8,10 @@ export interface IProduct {
 export interface ICustomer extends Document {
   name: string;
   gstin: string;
+  taluka: string;
+  district: string;
   products: IProduct[];
+  consignors: string[];
   userId: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -46,9 +49,29 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
         "Please enter a valid GSTIN (15 characters)",
       ],
     },
+    taluka: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    district: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     products: {
       type: [ProductSchema],
       default: [],
+    },
+    consignors: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: function (consignors: string[]) {
+          return consignors.every((name) => name && name.trim().length > 0);
+        },
+        message: "Consignor names cannot be empty",
+      },
     },
     userId: {
       type: Schema.Types.ObjectId,

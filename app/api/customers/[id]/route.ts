@@ -35,7 +35,8 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const { name, gstin, products } = await request.json();
+    const { name, gstin, taluka, district, products, consignors } =
+      await request.json();
 
     // Validate required fields
     if (!name || !gstin) {
@@ -74,7 +75,10 @@ export async function PUT(
 
     customer.name = name;
     customer.gstin = gstin.toUpperCase();
+    customer.taluka = taluka || "";
+    customer.district = district || "";
     customer.products = products || [];
+    customer.consignors = consignors || [];
     await customer.save();
 
     return NextResponse.json(

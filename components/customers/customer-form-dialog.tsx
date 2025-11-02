@@ -38,11 +38,14 @@ export default function CustomerFormDialog({
   const [formData, setFormData] = useState({
     name: "",
     gstin: "",
+    taluka: "",
+    district: "",
   });
 
   const [products, setProducts] = useState<Product[]>([
     { productName: "", productRate: 0 },
   ]);
+  const [consignors, setConsignors] = useState<string[]>([""]);
 
   const [validationError, setValidationError] = useState("");
 
@@ -51,18 +54,28 @@ export default function CustomerFormDialog({
       setFormData({
         name: customer.name,
         gstin: customer.gstin,
+        taluka: customer.taluka || "",
+        district: customer.district || "",
       });
       setProducts(
         customer.products && customer.products.length > 0
           ? customer.products
           : [{ productName: "", productRate: 0 }]
       );
+      setConsignors(
+        customer.consignors && customer.consignors.length > 0
+          ? customer.consignors
+          : [""]
+      );
     } else {
       setFormData({
         name: "",
         gstin: "",
+        taluka: "",
+        district: "",
       });
       setProducts([{ productName: "", productRate: 0 }]);
+      setConsignors([""]);
     }
     setValidationError("");
     dispatch(clearError());
@@ -89,6 +102,22 @@ export default function CustomerFormDialog({
     if (products.length > 1) {
       setProducts(products.filter((_, i) => i !== index));
     }
+  };
+
+  const addConsignor = () => {
+    setConsignors([...consignors, ""]);
+  };
+
+  const removeConsignor = (index: number) => {
+    if (consignors.length > 1) {
+      setConsignors(consignors.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleConsignorChange = (index: number, value: string) => {
+    const newConsignors = [...consignors];
+    newConsignors[index] = value;
+    setConsignors(newConsignors);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,18 +154,19 @@ export default function CustomerFormDialog({
       ? await dispatch(
           updateCustomer({
             id: customer._id,
-            customerData: { ...formData, products },
+            customerData: { ...formData, products, consignors },
           })
         )
-      : await dispatch(createCustomer({ ...formData, products }));
+      : await dispatch(createCustomer({ ...formData, products, consignors }));
 
     if (
       (customer && updateCustomer.fulfilled.match(result)) ||
       (!customer && createCustomer.fulfilled.match(result))
     ) {
       onOpenChange(false);
-      setFormData({ name: "", gstin: "" });
+      setFormData({ name: "", gstin: "", taluka: "", district: "" });
       setProducts([{ productName: "", productRate: 0 }]);
+      setConsignors([""]);
     }
   };
 
@@ -197,6 +227,34 @@ export default function CustomerFormDialog({
               </p>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <label htmlFor="taluka" className="text-sm font-medium">
+                  Taluka
+                </label>
+                <Input
+                  id="taluka"
+                  name="taluka"
+                  value={formData.taluka}
+                  onChange={handleChange}
+                  placeholder="Enter taluka"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <label htmlFor="district" className="text-sm font-medium">
+                  District
+                </label>
+                <Input
+                  id="district"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  placeholder="Enter district"
+                />
+              </div>
+            </div>
+
             <div className="grid gap-2">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-medium">Products</label>
@@ -248,6 +306,45 @@ export default function CustomerFormDialog({
                       size="sm"
                       onClick={() => removeProduct(index)}
                       disabled={products.length === 1}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <div className="flex justify-between items-center">
+                <label className="text-sm font-medium">Consignor Names</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addConsignor}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Consignor
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {consignors.map((consignor, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Consignor name"
+                        value={consignor}
+                        onChange={(e) =>
+                          handleConsignorChange(index, e.target.value)
+                        }
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeConsignor(index)}
+                      disabled={consignors.length === 1}
                     >
                       <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>

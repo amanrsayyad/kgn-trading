@@ -9,7 +9,10 @@ export interface Customer {
   _id: string;
   name: string;
   gstin: string;
+  taluka: string;
+  district: string;
   products: Product[];
+  consignors: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -53,7 +56,14 @@ export const fetchCustomers = createAsyncThunk(
 export const createCustomer = createAsyncThunk(
   "customer/createCustomer",
   async (
-    customerData: { name: string; gstin: string; products: Product[] },
+    customerData: {
+      name: string;
+      gstin: string;
+      taluka: string;
+      district: string;
+      products: Product[];
+      consignors: string[];
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -88,7 +98,14 @@ export const updateCustomer = createAsyncThunk(
       customerData,
     }: {
       id: string;
-      customerData: { name: string; gstin: string; products: Product[] };
+      customerData: {
+        name: string;
+        gstin: string;
+        taluka: string;
+        district: string;
+        products: Product[];
+        consignors: string[];
+      };
     },
     { rejectWithValue }
   ) => {

@@ -66,7 +66,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, gstin, products } = await request.json();
+    const { name, gstin, taluka, district, products, consignors } =
+      await request.json();
 
     // Validate required fields
     if (!name || !gstin) {
@@ -88,7 +89,10 @@ export async function POST(request: NextRequest) {
     const customer = await Customer.create({
       name,
       gstin: gstin.toUpperCase(),
+      taluka: taluka || "",
+      district: district || "",
       products: products || [],
+      consignors: consignors || [],
       userId,
     });
 
