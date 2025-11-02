@@ -332,6 +332,8 @@ export default function InvoiceFormDrawer({
                         value={formData.date}
                         onChange={handleChange}
                         required
+                        className="w-full"
+                        max="9999-12-31"
                       />
                     </div>
                     <div>
