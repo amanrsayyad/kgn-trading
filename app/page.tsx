@@ -14,7 +14,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Users, Truck, IndianRupee, TrendingUp, Package } from "lucide-react";
+import {
+  FileText,
+  Users,
+  Truck,
+  IndianRupee,
+  TrendingUp,
+  Package,
+} from "lucide-react";
 
 export default function Home() {
   const dispatch = useAppDispatch();
@@ -31,23 +38,34 @@ export default function Home() {
 
   // Calculate statistics
   const totalRevenue = invoices.reduce((sum, invoice) => {
-    const invoiceTotal = invoice.rows.reduce((rowSum, row) => rowSum + row.total, 0);
+    const invoiceTotal = invoice.rows.reduce(
+      (rowSum, row) => rowSum + row.total,
+      0
+    );
     return sum + invoiceTotal;
   }, 0);
 
   const paidInvoices = invoices.filter((inv) => inv.status === "Paid");
   const unpaidInvoices = invoices.filter((inv) => inv.status === "Unpaid");
-  const partiallyPaidInvoices = invoices.filter((inv) => inv.status === "Partially Paid");
+  const partiallyPaidInvoices = invoices.filter(
+    (inv) => inv.status === "Partially Paid"
+  );
 
   const paidRevenue = paidInvoices.reduce((sum, invoice) => {
-    const invoiceTotal = invoice.rows.reduce((rowSum, row) => rowSum + row.total, 0);
+    const invoiceTotal = invoice.rows.reduce(
+      (rowSum, row) => rowSum + row.total,
+      0
+    );
     return sum + invoiceTotal;
   }, 0);
 
   const pendingRevenue = totalRevenue - paidRevenue;
 
   const recentInvoices = [...invoices]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
     .slice(0, 5);
 
   const stats = [
@@ -71,8 +89,12 @@ export default function Home() {
     },
     {
       title: "Total Revenue",
-      value: `₹${totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
-      description: `₹${pendingRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })} pending`,
+      value: `₹${totalRevenue.toLocaleString("en-IN", {
+        maximumFractionDigits: 0,
+      })}`,
+      description: `₹${pendingRevenue.toLocaleString("en-IN", {
+        maximumFractionDigits: 0,
+      })} pending`,
       icon: IndianRupee,
     },
   ];
@@ -91,10 +113,10 @@ export default function Home() {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -153,13 +175,23 @@ export default function Home() {
               ) : (
                 <div className="space-y-4">
                   {recentInvoices.map((invoice) => {
-                    const total = invoice.rows.reduce((sum, row) => sum + row.total, 0);
-                    const customerName = getCustomerName(invoice.customerId) || invoice.customerName;
-                    
+                    const total = invoice.rows.reduce(
+                      (sum, row) => sum + row.total,
+                      0
+                    );
+                    const customerName =
+                      getCustomerName(invoice.customerId) ||
+                      invoice.customerName;
+
                     return (
-                      <div key={invoice._id} className="flex items-center justify-between border-b pb-4 last:border-0">
+                      <div
+                        key={invoice._id}
+                        className="flex items-center justify-between border-b pb-4 last:border-0"
+                      >
                         <div className="space-y-1">
-                          <p className="font-medium text-sm">{invoice.invoiceId}</p>
+                          <p className="font-medium text-sm">
+                            {invoice.invoiceId}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {customerName} • {formatDate(invoice.date)}
                           </p>
@@ -168,8 +200,13 @@ export default function Home() {
                           </p>
                         </div>
                         <div className="text-right space-y-1">
-                          <p className="font-semibold text-sm">₹{total.toLocaleString('en-IN')}</p>
-                          <Badge className={getStatusColor(invoice.status)} variant="secondary">
+                          <p className="font-semibold text-sm">
+                            ₹{total.toLocaleString("en-IN")}
+                          </p>
+                          <Badge
+                            className={getStatusColor(invoice.status)}
+                            variant="secondary"
+                          >
                             {invoice.status}
                           </Badge>
                         </div>
@@ -184,45 +221,55 @@ export default function Home() {
           <Card className="col-span-3">
             <CardHeader>
               <CardTitle>Revenue Overview</CardTitle>
-              <CardDescription>
-                Payment status breakdown.
-              </CardDescription>
+              <CardDescription>Payment status breakdown.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Paid</span>
                   <span className="text-sm font-bold text-green-600">
-                    ₹{paidRevenue.toLocaleString('en-IN')}
+                    ₹{paidRevenue.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>{paidInvoices.length} invoices</span>
                   <span>
-                    {totalRevenue > 0 ? ((paidRevenue / totalRevenue) * 100).toFixed(1) : 0}%
+                    {totalRevenue > 0
+                      ? ((paidRevenue / totalRevenue) * 100).toFixed(1)
+                      : 0}
+                    %
                   </span>
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-green-500"
                     style={{
-                      width: totalRevenue > 0 ? `${(paidRevenue / totalRevenue) * 100}%` : '0%',
+                      width:
+                        totalRevenue > 0
+                          ? `${(paidRevenue / totalRevenue) * 100}%`
+                          : "0%",
                     }}
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Pending</span>
                   <span className="text-sm font-bold text-red-600">
-                    ₹{pendingRevenue.toLocaleString('en-IN')}
+                    ₹{pendingRevenue.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{unpaidInvoices.length + partiallyPaidInvoices.length} invoices</span>
                   <span>
-                    {totalRevenue > 0 ? ((pendingRevenue / totalRevenue) * 100).toFixed(1) : 0}%
+                    {unpaidInvoices.length + partiallyPaidInvoices.length}{" "}
+                    invoices
+                  </span>
+                  <span>
+                    {totalRevenue > 0
+                      ? ((pendingRevenue / totalRevenue) * 100).toFixed(1)
+                      : 0}
+                    %
                   </span>
                 </div>
               </div>
@@ -231,7 +278,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Total Revenue</span>
                   <span className="text-sm font-bold">
-                    ₹{totalRevenue.toLocaleString('en-IN')}
+                    ₹{totalRevenue.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">

@@ -198,7 +198,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
             <br />
             <br />
             <p>
-              <strong>FOR RDS TRANSPORT</strong>
+              <strong>FOR KGN Trading</strong>
             </p>
           </div>
         </div>
