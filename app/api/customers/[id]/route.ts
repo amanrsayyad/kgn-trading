@@ -39,9 +39,9 @@ export async function PUT(
       await request.json();
 
     // Validate required fields
-    if (!name || !gstin) {
+    if (!name) {
       return NextResponse.json(
-        { success: false, message: "Name and GSTIN are required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
@@ -55,8 +55,12 @@ export async function PUT(
       );
     }
 
-    // Check if GSTIN is being changed to one that already exists
-    if (gstin.toUpperCase() !== customer.gstin) {
+    // Check if GSTIN is being changed to one that already exists (only if GSTIN provided)
+    if (
+      gstin &&
+      gstin.trim() !== "" &&
+      gstin.toUpperCase() !== customer.gstin
+    ) {
       const existingCustomer = await Customer.findOne({
         gstin: gstin.toUpperCase(),
         userId,
@@ -74,7 +78,7 @@ export async function PUT(
     }
 
     customer.name = name;
-    customer.gstin = gstin.toUpperCase();
+    customer.gstin = gstin && gstin.trim() !== "" ? gstin.toUpperCase() : "";
     customer.taluka = taluka || "";
     customer.district = district || "";
     customer.products = products || [];

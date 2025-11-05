@@ -41,7 +41,7 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
     },
     gstin: {
       type: String,
-      required: [true, "GSTIN is required"],
+      required: false,
       trim: true,
       uppercase: true,
       match: [
@@ -86,7 +86,8 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
 
 // Index for faster queries
 CustomerSchema.index({ userId: 1 });
-CustomerSchema.index({ gstin: 1, userId: 1 }, { unique: true });
+// Only create unique index if GSTIN is provided
+CustomerSchema.index({ gstin: 1, userId: 1 }, { unique: true, sparse: true });
 
 // Delete cached model to ensure schema is updated
 if (mongoose.models.Customer) {

@@ -70,25 +70,33 @@ export async function POST(request: NextRequest) {
       await request.json();
 
     // Validate required fields
-    if (!name || !gstin) {
+    if (!name) {
       return NextResponse.json(
-        { success: false, message: "Name and GSTIN are required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
 
-    // Check if customer with same GSTIN already exists for this user
-    const existingCustomer = await Customer.findOne({ gstin, userId });
-    if (existingCustomer) {
-      return NextResponse.json(
-        { success: false, message: "Customer with this GSTIN already exists" },
-        { status: 400 }
-      );
+    // Check if customer with same GSTIN already exists for this user (only if GSTIN provided)
+    if (gstin && gstin.trim() !== "") {
+      const existingCustomer = await Customer.findOne({
+        gstin: gstin.toUpperCase(),
+        userId,
+      });
+      if (existingCustomer) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Customer with this GSTIN already exists",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const customer = await Customer.create({
       name,
-      gstin: gstin.toUpperCase(),
+      gstin: gstin && gstin.trim() !== "" ? gstin.toUpperCase() : "",
       taluka: taluka || "",
       district: district || "",
       products: products || [],

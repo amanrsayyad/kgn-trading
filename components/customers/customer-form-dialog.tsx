@@ -144,8 +144,12 @@ export default function CustomerFormDialog({
       return;
     }
 
-    // Validate GSTIN
-    if (!validateGSTIN(formData.gstin)) {
+    // Validate GSTIN only if provided
+    if (
+      formData.gstin &&
+      formData.gstin.trim() !== "" &&
+      !validateGSTIN(formData.gstin)
+    ) {
       setValidationError("Please enter a valid 15-character GSTIN");
       return;
     }
@@ -210,20 +214,20 @@ export default function CustomerFormDialog({
 
             <div className="grid gap-2">
               <label htmlFor="gstin" className="text-sm font-medium">
-                GSTIN <span className="text-red-500">*</span>
+                GSTIN
               </label>
               <Input
                 id="gstin"
                 name="gstin"
                 value={formData.gstin}
                 onChange={handleChange}
-                placeholder="22AAAAA0000A1Z5"
+                placeholder="22AAAAA0000A1Z5 (Optional)"
                 maxLength={15}
-                required
                 className="uppercase"
               />
               <p className="text-xs text-muted-foreground">
                 15-character Goods and Services Tax Identification Number
+                (Optional)
               </p>
             </div>
 
