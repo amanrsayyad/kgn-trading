@@ -15,11 +15,17 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: null,
+  user:
+    typeof window !== "undefined" && localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user")!)
+      : null,
   token: typeof window !== "undefined" ? localStorage.getItem("token") : null,
   isLoading: false,
   error: null,
-  isAuthenticated: false,
+  isAuthenticated:
+    typeof window !== "undefined" && localStorage.getItem("token")
+      ? true
+      : false,
 };
 
 // Register async thunk
@@ -76,6 +82,7 @@ export const loginUser = createAsyncThunk(
       // Store token in localStorage
       if (typeof window !== "undefined" && data.token) {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
       return data;
@@ -103,6 +110,7 @@ export const logoutUser = createAsyncThunk(
       // Clear token from localStorage
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
 
       return data;
@@ -123,6 +131,7 @@ const authSlice = createSlice({
       state.error = null;
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
     },
     clearError: (state) => {
@@ -132,6 +141,10 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", action.payload.token);
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      }
     },
   },
   extraReducers: (builder) => {
@@ -160,6 +173,10 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.error = null;
+      // Persist user data
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(action.payload.user));
+      }
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.isLoading = false;
@@ -177,6 +194,10 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
+      // Clear persisted data
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+      }
     });
     builder.addCase(logoutUser.rejected, (state, action) => {
       state.isLoading = false;

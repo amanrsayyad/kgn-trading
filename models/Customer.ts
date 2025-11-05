@@ -44,6 +44,7 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
       required: false,
       trim: true,
       uppercase: true,
+      default: null,
       match: [
         /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
         "Please enter a valid GSTIN (15 characters)",
@@ -86,8 +87,18 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
 
 // Index for faster queries
 CustomerSchema.index({ userId: 1 });
-// Only create unique index if GSTIN is provided
+// Only create unique index if GSTIN is provided (sparse: true ignores null values)
 CustomerSchema.index({ gstin: 1, userId: 1 }, { unique: true, sparse: true });
+
+// Drop old index and recreate on first run (handles migration from empty string to null)
+if (mongoose.connection.readyState === 1) {
+  mongoose.connection.db
+    ?.collection("customers")
+    .dropIndex("gstin_1_userId_1")
+    .catch(() => {
+      // Index might not exist, that's fine
+    });
+}
 
 // Delete cached model to ensure schema is updated
 if (mongoose.models.Customer) {

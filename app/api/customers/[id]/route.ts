@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     customer.name = name;
-    customer.gstin = gstin && gstin.trim() !== "" ? gstin.toUpperCase() : "";
+    customer.gstin = gstin && gstin.trim() !== "" ? gstin.toUpperCase() : null;
     customer.taluka = taluka || "";
     customer.district = district || "";
     customer.products = products || [];
