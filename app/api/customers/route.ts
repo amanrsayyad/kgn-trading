@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
     const customer = await Customer.create({
       name,
-      gstin: gstin && gstin.trim() !== "" ? gstin.toUpperCase() : null,
+      gstin: gstin && gstin.trim() !== "" ? gstin.toUpperCase() : "",
       taluka: taluka || "",
       district: district || "",
       products: products || [],
