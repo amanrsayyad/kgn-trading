@@ -13,6 +13,7 @@ import {
   Users,
   FileText,
   Truck,
+  MapPin,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -52,6 +53,11 @@ const menuItems = [
     title: "Vehicles",
     url: "/vehicles",
     icon: Truck,
+  },
+  {
+    title: "Locations",
+    url: "/locations",
+    icon: MapPin,
   },
   {
     title: "Invoices",

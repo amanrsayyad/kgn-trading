@@ -9,6 +9,7 @@ import {
 } from "@/lib/features/invoice/invoiceSlice";
 import { fetchCustomers } from "@/lib/features/customer/customerSlice";
 import { fetchVehicles } from "@/lib/features/vehicle/vehicleSlice";
+import { fetchLocations, createLocation } from "@/lib/features/location/locationSlice";
 import {
   Drawer,
   DrawerContent,
@@ -49,9 +50,14 @@ export default function InvoiceFormDrawer({
   const { vehicles, isLoading: vehiclesLoading } = useAppSelector(
     (state) => state.vehicle
   );
+  const { locations } = useAppSelector((state) => state.location);
 
   const [customerProducts, setCustomerProducts] = useState<Product[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [showAddFromLocation, setShowAddFromLocation] = useState(false);
+  const [showAddToLocation, setShowAddToLocation] = useState(false);
+  const [newFromLocationName, setNewFromLocationName] = useState("");
+  const [newToLocationName, setNewToLocationName] = useState("");
 
   const generateInvoiceId = () => {
     const timestamp = Date.now().toString(36).toUpperCase();
@@ -97,11 +103,13 @@ export default function InvoiceFormDrawer({
   useEffect(() => {
     if (open) {
       setDataLoaded(false);
-      Promise.all([dispatch(fetchCustomers()), dispatch(fetchVehicles())]).then(
-        () => {
-          setDataLoaded(true);
-        }
-      );
+      Promise.all([
+        dispatch(fetchCustomers()),
+        dispatch(fetchVehicles()),
+        dispatch(fetchLocations()),
+      ]).then(() => {
+        setDataLoaded(true);
+      });
     }
   }, [open, dispatch]);
 
@@ -379,21 +387,121 @@ export default function InvoiceFormDrawer({
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-sm font-medium">From *</label>
-                      <Input
-                        name="from"
-                        value={formData.from}
-                        onChange={handleChange}
-                        required
-                      />
+                      <div className="flex gap-2">
+                        <Select
+                          value={formData.from}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, from: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location) => (
+                              <SelectItem
+                                key={location._id}
+                                value={location.name}
+                              >
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAddFromLocation(!showAddFromLocation)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      {showAddFromLocation && (
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            value={newFromLocationName}
+                            onChange={(e) => setNewFromLocationName(e.target.value)}
+                            placeholder="Enter new location name"
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={async () => {
+                              if (newFromLocationName.trim()) {
+                                await dispatch(createLocation({ name: newFromLocationName.trim() }));
+                                setFormData({ ...formData, from: newFromLocationName.trim() });
+                                setNewFromLocationName("");
+                                setShowAddFromLocation(false);
+                                // Refresh locations
+                                dispatch(fetchLocations());
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium">To *</label>
-                      <Input
-                        name="to"
-                        value={formData.to}
-                        onChange={handleChange}
-                        required
-                      />
+                      <div className="flex gap-2">
+                        <Select
+                          value={formData.to}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, to: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location) => (
+                              <SelectItem
+                                key={location._id}
+                                value={location.name}
+                              >
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAddToLocation(!showAddToLocation)}
+                        >
+                          +
+                        </Button>
+                      </div>
+                      {showAddToLocation && (
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            value={newToLocationName}
+                            onChange={(e) => setNewToLocationName(e.target.value)}
+                            placeholder="Enter new location name"
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={async () => {
+                              if (newToLocationName.trim()) {
+                                await dispatch(createLocation({ name: newToLocationName.trim() }));
+                                setFormData({ ...formData, to: newToLocationName.trim() });
+                                setNewToLocationName("");
+                                setShowAddToLocation(false);
+                                // Refresh locations
+                                dispatch(fetchLocations());
+                              }
+                            }}
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="text-sm font-medium">Taluka *</label>

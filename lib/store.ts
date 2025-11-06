@@ -4,6 +4,7 @@ import authReducer from "./features/auth/authSlice";
 import customerReducer from "./features/customer/customerSlice";
 import invoiceReducer from "./features/invoice/invoiceSlice";
 import vehicleReducer from "./features/vehicle/vehicleSlice";
+import locationReducer from "./features/location/locationSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -13,6 +14,7 @@ export const makeStore = () => {
       customer: customerReducer,
       invoice: invoiceReducer,
       vehicle: vehicleReducer,
+      location: locationReducer,
     },
   });
 };
