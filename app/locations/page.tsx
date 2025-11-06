@@ -90,9 +90,6 @@ export default function LocationsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Location Name</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Taluka</TableHead>
-                  <TableHead>District</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -102,9 +99,6 @@ export default function LocationsPage() {
                     <TableCell className="font-medium">
                       {location.name}
                     </TableCell>
-                    <TableCell>{location.address}</TableCell>
-                    <TableCell>{location.taluka || "-"}</TableCell>
-                    <TableCell>{location.district || "-"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button

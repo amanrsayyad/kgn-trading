@@ -9,7 +9,10 @@ import {
 } from "@/lib/features/invoice/invoiceSlice";
 import { fetchCustomers } from "@/lib/features/customer/customerSlice";
 import { fetchVehicles } from "@/lib/features/vehicle/vehicleSlice";
-import { fetchLocations, createLocation } from "@/lib/features/location/locationSlice";
+import {
+  fetchLocations,
+  createLocation,
+} from "@/lib/features/location/locationSlice";
 import {
   Drawer,
   DrawerContent,
@@ -412,7 +415,9 @@ export default function InvoiceFormDrawer({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowAddFromLocation(!showAddFromLocation)}
+                          onClick={() =>
+                            setShowAddFromLocation(!showAddFromLocation)
+                          }
                         >
                           +
                         </Button>
@@ -421,7 +426,9 @@ export default function InvoiceFormDrawer({
                         <div className="flex gap-2 mt-2">
                           <Input
                             value={newFromLocationName}
-                            onChange={(e) => setNewFromLocationName(e.target.value)}
+                            onChange={(e) =>
+                              setNewFromLocationName(e.target.value)
+                            }
                             placeholder="Enter new location name"
                             className="flex-1"
                           />
@@ -430,8 +437,15 @@ export default function InvoiceFormDrawer({
                             size="sm"
                             onClick={async () => {
                               if (newFromLocationName.trim()) {
-                                await dispatch(createLocation({ name: newFromLocationName.trim() }));
-                                setFormData({ ...formData, from: newFromLocationName.trim() });
+                                await dispatch(
+                                  createLocation({
+                                    name: newFromLocationName.trim(),
+                                  })
+                                );
+                                setFormData({
+                                  ...formData,
+                                  from: newFromLocationName.trim(),
+                                });
                                 setNewFromLocationName("");
                                 setShowAddFromLocation(false);
                                 // Refresh locations
@@ -471,7 +485,9 @@ export default function InvoiceFormDrawer({
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowAddToLocation(!showAddToLocation)}
+                          onClick={() =>
+                            setShowAddToLocation(!showAddToLocation)
+                          }
                         >
                           +
                         </Button>
@@ -480,7 +496,9 @@ export default function InvoiceFormDrawer({
                         <div className="flex gap-2 mt-2">
                           <Input
                             value={newToLocationName}
-                            onChange={(e) => setNewToLocationName(e.target.value)}
+                            onChange={(e) =>
+                              setNewToLocationName(e.target.value)
+                            }
                             placeholder="Enter new location name"
                             className="flex-1"
                           />
@@ -489,8 +507,15 @@ export default function InvoiceFormDrawer({
                             size="sm"
                             onClick={async () => {
                               if (newToLocationName.trim()) {
-                                await dispatch(createLocation({ name: newToLocationName.trim() }));
-                                setFormData({ ...formData, to: newToLocationName.trim() });
+                                await dispatch(
+                                  createLocation({
+                                    name: newToLocationName.trim(),
+                                  })
+                                );
+                                setFormData({
+                                  ...formData,
+                                  to: newToLocationName.trim(),
+                                });
                                 setNewToLocationName("");
                                 setShowAddToLocation(false);
                                 // Refresh locations

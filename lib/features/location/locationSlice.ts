@@ -45,10 +45,7 @@ export const fetchLocations = createAsyncThunk(
 // Create location
 export const createLocation = createAsyncThunk(
   "location/createLocation",
-  async (
-    locationData: { name: string },
-    { rejectWithValue }
-  ) => {
+  async (locationData: { name: string }, { rejectWithValue }) => {
     try {
       const response = await fetch("/api/locations", {
         method: "POST",
