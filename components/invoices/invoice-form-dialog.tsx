@@ -71,31 +71,30 @@ export default function InvoiceFormDrawer({
   const generateInvoiceNo = async () => {
     // Fetch all invoices for the user to determine the next invoice number
     try {
-      const response = await fetch('/api/invoices');
+      const response = await fetch("/api/invoices");
       if (response.ok) {
         const data = await response.json();
         const invoices = data.invoices || [];
-        
+
         // Extract invoice numbers and find the highest
         const invoiceNumbers = invoices
           .map((inv: any) => parseInt(inv.invoiceNo, 10))
           .filter((num: number) => !isNaN(num));
-          
-        const maxInvoiceNo = invoiceNumbers.length > 0 
-          ? Math.max(...invoiceNumbers) 
-          : 0;
-          
+
+        const maxInvoiceNo =
+          invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
+
         // Increment and format to 4 digits
         const nextInvoiceNo = maxInvoiceNo + 1;
-        return nextInvoiceNo.toString().padStart(4, '0');
+        return nextInvoiceNo.toString().padStart(4, "0");
       } else {
         // Fallback to 0001 if API call fails
-        return '0001';
+        return "0001";
       }
     } catch (error) {
-      console.error('Error generating invoice number:', error);
+      console.error("Error generating invoice number:", error);
       // Fallback to 0001 if there's an error
-      return '0001';
+      return "0001";
     }
   };
 
@@ -154,8 +153,8 @@ export default function InvoiceFormDrawer({
         dist: invoice.dist,
         customerId:
           typeof invoice.customerId === "string"
-          ? invoice.customerId
-          : invoice.customerId?._id || "",
+            ? invoice.customerId
+            : invoice.customerId?._id || "",
         consignor: invoice.consignor,
         consignee: invoice.consignee,
         invoiceNo: invoice.invoiceNo,
@@ -177,8 +176,8 @@ export default function InvoiceFormDrawer({
       }
     } else {
       // Generate next invoice number
-      generateInvoiceNo().then(invoiceNo => {
-        setFormData(prevData => ({
+      generateInvoiceNo().then((invoiceNo) => {
+        setFormData((prevData) => ({
           ...prevData,
           invoiceId: generateInvoiceId(),
           invoiceNo: invoiceNo,

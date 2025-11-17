@@ -99,7 +99,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
           <div style={{ ...styles.smallText, ...styles.rightAlign }}>
             <p>
               <strong>Date:</strong>{" "}
-              {new Date(invoice.date).toLocaleDateString()}
+              {new Date(invoice.date).toLocaleDateString('en-GB')}
             </p>
             <p>
               <strong>From:</strong> {invoice.from}
