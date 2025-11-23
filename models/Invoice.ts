@@ -21,6 +21,9 @@ export interface IInvoice extends Document {
   dist: string;
   customerId?: mongoose.Types.ObjectId | null;
   customerName?: string;
+  appUserId?: mongoose.Types.ObjectId | null;
+  appUserName?: string;
+  appUserGstin?: string;
   consignor: string;
   consignee: string;
   invoiceNo: string;
@@ -124,6 +127,24 @@ const InvoiceSchema: Schema<IInvoice> = new Schema(
       required: false,
       trim: true,
     },
+    appUserId: {
+      type: Schema.Types.ObjectId,
+      ref: "AppUser",
+      required: false,
+      default: null,
+    },
+    appUserName: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    appUserGstin: {
+      type: String,
+      required: false,
+      trim: true,
+      uppercase: true,
+      default: "",
+    },
     consignor: {
       type: String,
       required: [true, "Consignor is required"],
@@ -173,6 +194,7 @@ const InvoiceSchema: Schema<IInvoice> = new Schema(
 InvoiceSchema.index({ userId: 1, date: -1 });
 InvoiceSchema.index({ invoiceId: 1, userId: 1 }, { unique: true });
 InvoiceSchema.index({ customerId: 1 });
+InvoiceSchema.index({ appUserId: 1 });
 
 // Delete cached model to ensure schema is updated
 if (mongoose.models.Invoice) {

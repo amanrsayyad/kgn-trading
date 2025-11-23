@@ -11,6 +11,16 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
   // Calculate total from rows
   const total = invoice.rows.reduce((sum, row) => sum + row.total, 0);
 
+  // Derive selected App User display values
+  const appUserObj = typeof invoice.appUserId === "object" ? invoice.appUserId : null;
+  const displayCompanyName = appUserObj?.name || invoice.appUserName || "KGN Trading";
+  const displayGstin = appUserObj?.gstin || invoice.appUserGstin || "27BTFPS4233J2ZD";
+
+  // Derive customer display values
+  const customerObj = typeof invoice.customerId === "object" ? invoice.customerId : null;
+  const displayCustomerName = invoice.customerName || customerObj?.name || "";
+  const displayCustomerGstin = customerObj?.gstin || "";
+
   // Use only inline styles with basic CSS properties to avoid color function issues
   const styles: { [key: string]: CSSProperties } = {
     container: {
@@ -84,9 +94,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
         </h1>
         <div style={styles.headerFlex}>
           <div>
-            <h1 style={styles.companyName}>KGN Trading</h1>
+            <h1 style={styles.companyName}>{displayCompanyName}</h1>
             <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>
-              GSTIN: 27BTFPS4233J2ZD
+              GSTIN: {displayGstin || "_________"}
             </h2>
             <p style={styles.smallText}>
               (Transport Contractor, Commission Agent)
@@ -118,7 +128,10 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
 
         <div style={styles.divider}>
           <p style={styles.smallText}>
-            <strong>Company Name:</strong> {invoice.customerName}
+            <strong>Company Name:</strong> {displayCustomerName}
+          </p>
+          <p style={styles.smallText}>
+            <strong>Customer GSTIN:</strong> {displayCustomerGstin || "_________"}
           </p>
           <p style={styles.smallText}>
             <strong>Consignor:</strong> {invoice.consignor}

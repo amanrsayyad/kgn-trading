@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import connectDB from "@/lib/mongodb";
 import Invoice from "@/models/Invoice";
 import Customer from "@/models/Customer";
+import AppUser from "@/models/AppUser";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 
@@ -68,6 +69,29 @@ export async function PUT(
       customerId = customer._id;
     }
 
+    // Validate app user exists and belongs to user (if appUserId is provided)
+    let appUserName = invoiceData.appUserName || "";
+    let appUserId = null;
+    let appUserGstin = invoiceData.appUserGstin || "";
+
+    if (invoiceData.appUserId && invoiceData.appUserId.trim && invoiceData.appUserId.trim() !== "") {
+      const appUser = await AppUser.findOne({
+        _id: invoiceData.appUserId,
+        userId,
+      });
+
+      if (!appUser) {
+        return NextResponse.json(
+          { success: false, message: "App User not found" },
+          { status: 404 }
+        );
+      }
+
+      appUserName = appUser.name;
+      appUserId = appUser._id;
+      appUserGstin = appUser.gstin || "";
+    }
+
     // Check if invoice ID is being changed to one that already exists
     if (invoiceData.invoiceId !== invoice.invoiceId) {
       const existingInvoice = await Invoice.findOne({
@@ -89,6 +113,9 @@ export async function PUT(
       ...invoiceData,
       customerId,
       customerName,
+      appUserId,
+      appUserName,
+      appUserGstin,
     };
 
     // Set default status if empty
@@ -99,10 +126,9 @@ export async function PUT(
     Object.assign(invoice, updateData);
     await invoice.save();
 
-    const populatedInvoice = await Invoice.findById(id).populate(
-      "customerId",
-      "name gstin"
-    );
+    const populatedInvoice = await Invoice.findById(id)
+      .populate("customerId", "name gstin")
+      .populate("appUserId", "name gstin");
 
     return NextResponse.json(
       {

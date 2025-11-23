@@ -13,6 +13,7 @@ import {
   fetchLocations,
   createLocation,
 } from "@/lib/features/location/locationSlice";
+import { fetchAppUsers } from "@/lib/features/appuser/appuserSlice";
 import {
   Drawer,
   DrawerContent,
@@ -54,6 +55,7 @@ export default function InvoiceFormDrawer({
     (state) => state.vehicle
   );
   const { locations } = useAppSelector((state) => state.location);
+  const { appusers } = useAppSelector((state) => state.appuser);
 
   const [customerProducts, setCustomerProducts] = useState<Product[]>([]);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -106,6 +108,7 @@ export default function InvoiceFormDrawer({
     taluka: "",
     dist: "",
     customerId: "",
+    appUserId: "",
     consignor: "",
     consignee: "",
     invoiceNo: "0001", // Default value
@@ -134,6 +137,7 @@ export default function InvoiceFormDrawer({
         dispatch(fetchCustomers()),
         dispatch(fetchVehicles()),
         dispatch(fetchLocations()),
+        dispatch(fetchAppUsers()),
       ]).then(() => {
         setDataLoaded(true);
       });
@@ -155,6 +159,10 @@ export default function InvoiceFormDrawer({
           typeof invoice.customerId === "string"
             ? invoice.customerId
             : invoice.customerId?._id || "",
+        appUserId:
+          typeof invoice.appUserId === "string"
+            ? (invoice.appUserId as string)
+            : (invoice.appUserId as any)?._id || "",
         consignor: invoice.consignor,
         consignee: invoice.consignee,
         invoiceNo: invoice.invoiceNo,
@@ -568,24 +576,44 @@ export default function InvoiceFormDrawer({
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="text-sm font-medium">Customer *</label>
-                      <Select
-                        value={formData.customerId}
-                        onValueChange={handleCustomerChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select customer" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {customers.map((customer) => (
-                            <SelectItem key={customer._id} value={customer._id}>
-                              {customer.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <label className="text-sm font-medium">Customer *</label>
+                    <Select
+                      value={formData.customerId}
+                      onValueChange={handleCustomerChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select customer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers.map((customer) => (
+                          <SelectItem key={customer._id} value={customer._id}>
+                            {customer.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">App User</label>
+                    <Select
+                      value={formData.appUserId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, appUserId: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select app user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {appusers.map((user) => (
+                          <SelectItem key={user._id} value={user._id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                     <div>
                       <label className="text-sm font-medium">
                         Invoice No *

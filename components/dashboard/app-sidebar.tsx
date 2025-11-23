@@ -60,6 +60,11 @@ const menuItems = [
     icon: MapPin,
   },
   {
+    title: "App Users",
+    url: "/appusers",
+    icon: User2,
+  },
+  {
     title: "Invoices",
     url: "/invoices",
     icon: FileText,

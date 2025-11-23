@@ -5,6 +5,7 @@ import customerReducer from "./features/customer/customerSlice";
 import invoiceReducer from "./features/invoice/invoiceSlice";
 import vehicleReducer from "./features/vehicle/vehicleSlice";
 import locationReducer from "./features/location/locationSlice";
+import appuserReducer from "./features/appuser/appuserSlice";
 
 export const makeStore = () => {
   return configureStore({
@@ -15,6 +16,7 @@ export const makeStore = () => {
       invoice: invoiceReducer,
       vehicle: vehicleReducer,
       location: locationReducer,
+      appuser: appuserReducer,
     },
   });
 };

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import connectDB from "@/lib/mongodb";
 import Invoice from "@/models/Invoice";
 import Customer from "@/models/Customer";
+import AppUser from "@/models/AppUser";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 
@@ -87,6 +88,7 @@ export async function GET(request: NextRequest) {
     // Fetch paginated invoices
     const invoices = await Invoice.find(filter)
       .populate("customerId", "name gstin")
+      .populate("appUserId", "name gstin")
       .sort({ date: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -153,6 +155,29 @@ export async function POST(request: NextRequest) {
       customerId = customer._id;
     }
 
+    // Validate app user exists and belongs to user (if appUserId is provided)
+    let appUserName = "";
+    let appUserId = null;
+    let appUserGstin = "";
+
+    if (invoiceData.appUserId && invoiceData.appUserId.trim() !== "") {
+      const appUser = await AppUser.findOne({
+        _id: invoiceData.appUserId,
+        userId,
+      });
+
+      if (!appUser) {
+        return NextResponse.json(
+          { success: false, message: "App User not found" },
+          { status: 404 }
+        );
+      }
+
+      appUserName = appUser.name;
+      appUserId = appUser._id;
+      appUserGstin = appUser.gstin || "";
+    }
+
     // Check if invoice ID already exists for this user
     const existingInvoice = await Invoice.findOne({
       invoiceId: invoiceData.invoiceId,
@@ -166,18 +191,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create invoice with customer name
+    // Create invoice with customer/app user names
     const invoice = await Invoice.create({
       ...invoiceData,
       customerId,
       customerName,
+      appUserId,
+      appUserName,
+      appUserGstin,
       userId,
     });
 
-    const populatedInvoice = await Invoice.findById(invoice._id).populate(
-      "customerId",
-      "name gstin"
-    );
+    const populatedInvoice = await Invoice.findById(invoice._id)
+      .populate("customerId", "name gstin")
+      .populate("appUserId", "name gstin");
 
     return NextResponse.json(
       {

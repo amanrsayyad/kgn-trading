@@ -271,13 +271,14 @@ export default function InvoicesPage() {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      // Calculate dimensions to fit page
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = pdfWidth / (imgWidth / 2.83); // Convert px to mm (96 DPI)
-      const scaledHeight = (imgHeight / 2.83) * ratio;
+      // Requirement: 100% page width and 50% page height
+      const targetWidth = pdfWidth; // full width
+      const targetHeight = pdfHeight * 0.5; // half page height
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, scaledHeight);
+      const x = 0; // align to left edge
+      const y = 0; // align to top edge
+
+      pdf.addImage(imgData, "PNG", x, y, targetWidth, targetHeight);
 
       const filename = `Invoice-${viewingInvoice.invoiceId}.pdf`;
       console.log("Saving PDF as:", filename);

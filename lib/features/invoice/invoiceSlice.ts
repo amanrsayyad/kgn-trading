@@ -22,6 +22,9 @@ export interface Invoice {
   dist: string;
   customerId: string | { _id: string; name: string; gstin: string };
   customerName: string;
+  appUserId?: string | { _id: string; name: string; gstin: string };
+  appUserName?: string;
+  appUserGstin?: string;
   consignor: string;
   consignee: string;
   invoiceNo: string;
@@ -110,7 +113,7 @@ export const createInvoice = createAsyncThunk(
   async (
     invoiceData: Omit<
       Invoice,
-      "_id" | "createdAt" | "updatedAt" | "customerName"
+      "_id" | "createdAt" | "updatedAt" | "customerName" | "appUserName" | "appUserGstin"
     >,
     { rejectWithValue }
   ) => {
@@ -148,7 +151,7 @@ export const updateInvoice = createAsyncThunk(
       id: string;
       invoiceData: Omit<
         Invoice,
-        "_id" | "createdAt" | "updatedAt" | "customerName"
+        "_id" | "createdAt" | "updatedAt" | "customerName" | "appUserName" | "appUserGstin"
       >;
     },
     { rejectWithValue }
