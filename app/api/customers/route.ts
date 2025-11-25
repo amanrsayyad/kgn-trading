@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, gstin, taluka, district, products, consignors } =
+    const { name, gstin, taluka, district, address, products, consignors } =
       await request.json();
 
     // Validate required fields
@@ -99,6 +99,7 @@ export async function POST(request: NextRequest) {
       gstin: gstin && gstin.trim() !== "" ? gstin.toUpperCase() : "",
       taluka: taluka || "",
       district: district || "",
+      address: address || "",
       products: products || [],
       consignors: consignors || [],
       userId,

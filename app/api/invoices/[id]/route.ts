@@ -108,6 +108,27 @@ export async function PUT(
       }
     }
 
+    // Ensure invoice number uniqueness per App User when changed
+    const nextAppUserId = appUserId ?? null;
+    if (
+      invoiceData.invoiceNo !== invoice.invoiceNo ||
+      String(nextAppUserId || '') !== String(invoice.appUserId || '')
+    ) {
+      const duplicateInvoiceNo = await Invoice.findOne({
+        userId,
+        appUserId: nextAppUserId,
+        invoiceNo: invoiceData.invoiceNo,
+        _id: { $ne: id },
+      });
+
+      if (duplicateInvoiceNo) {
+        return NextResponse.json(
+          { success: false, message: "Invoice number already exists for selected App User" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Update invoice
     const updateData: any = {
       ...invoiceData,
@@ -127,7 +148,7 @@ export async function PUT(
     await invoice.save();
 
     const populatedInvoice = await Invoice.findById(id)
-      .populate("customerId", "name gstin")
+      .populate("customerId", "name gstin address")
       .populate("appUserId", "name gstin");
 
     return NextResponse.json(

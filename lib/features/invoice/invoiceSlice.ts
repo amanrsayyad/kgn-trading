@@ -20,7 +20,7 @@ export interface Invoice {
   to: string;
   taluka: string;
   dist: string;
-  customerId: string | { _id: string; name: string; gstin: string };
+  customerId: string | { _id: string; name: string; gstin: string; address?: string };
   customerName: string;
   appUserId?: string | { _id: string; name: string; gstin: string };
   appUserName?: string;

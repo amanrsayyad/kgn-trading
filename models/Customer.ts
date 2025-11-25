@@ -10,6 +10,7 @@ export interface ICustomer extends Document {
   gstin: string;
   taluka: string;
   district: string;
+  address?: string;
   products: IProduct[];
   consignors: string[];
   userId: mongoose.Types.ObjectId;
@@ -59,6 +60,13 @@ const CustomerSchema: Schema<ICustomer> = new Schema(
       type: String,
       required: false,
       trim: true,
+    },
+    address: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+      maxlength: [200, "Address must not exceed 200 characters"],
     },
     products: {
       type: [ProductSchema],

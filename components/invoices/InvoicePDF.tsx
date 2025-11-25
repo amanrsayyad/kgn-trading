@@ -20,6 +20,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
   const customerObj = typeof invoice.customerId === "object" ? invoice.customerId : null;
   const displayCustomerName = invoice.customerName || customerObj?.name || "";
   const displayCustomerGstin = customerObj?.gstin || "";
+  const displayCustomerAddress = (customerObj as any)?.address || "";
 
   // Use only inline styles with basic CSS properties to avoid color function issues
   const styles: { [key: string]: CSSProperties } = {
@@ -134,6 +135,9 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
             <strong>Customer GSTIN:</strong> {displayCustomerGstin || "_________"}
           </p>
           <p style={styles.smallText}>
+            <strong>Customer Address:</strong> {displayCustomerAddress || "_________"}
+          </p>
+          <p style={styles.smallText}>
             <strong>Consignor:</strong> {invoice.consignor}
           </p>
           <p style={styles.smallText}>
@@ -211,7 +215,7 @@ export const InvoicePDF: React.FC<InvoicePDFProps> = ({ invoice }) => {
             <br />
             <br />
             <p>
-              <strong>FOR KGN Trading</strong>
+              <strong>{displayCompanyName}</strong>
             </p>
           </div>
         </div>

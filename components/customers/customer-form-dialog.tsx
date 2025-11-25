@@ -40,6 +40,7 @@ export default function CustomerFormDialog({
     gstin: "",
     taluka: "",
     district: "",
+    address: "",
   });
 
   const [products, setProducts] = useState<Product[]>([
@@ -56,6 +57,7 @@ export default function CustomerFormDialog({
         gstin: customer.gstin,
         taluka: customer.taluka || "",
         district: customer.district || "",
+        address: customer.address || "",
       });
       setProducts(
         customer.products && customer.products.length > 0
@@ -73,6 +75,7 @@ export default function CustomerFormDialog({
         gstin: "",
         taluka: "",
         district: "",
+        address: "",
       });
       setProducts([{ productName: "", productRate: 0 }]);
       setConsignors([""]);
@@ -168,7 +171,7 @@ export default function CustomerFormDialog({
       (!customer && createCustomer.fulfilled.match(result))
     ) {
       onOpenChange(false);
-      setFormData({ name: "", gstin: "", taluka: "", district: "" });
+      setFormData({ name: "", gstin: "", taluka: "", district: "", address: "" });
       setProducts([{ productName: "", productRate: 0 }]);
       setConsignors([""]);
     }
@@ -229,6 +232,19 @@ export default function CustomerFormDialog({
                 15-character Goods and Services Tax Identification Number
                 (Optional)
               </p>
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="address" className="text-sm font-medium">
+                Address
+              </label>
+              <Input
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Street, Area, City"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

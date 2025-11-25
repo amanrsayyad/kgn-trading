@@ -11,6 +11,7 @@ export interface Customer {
   gstin: string;
   taluka: string;
   district: string;
+  address?: string;
   products: Product[];
   consignors: string[];
   createdAt: string;
@@ -61,6 +62,7 @@ export const createCustomer = createAsyncThunk(
       gstin: string;
       taluka: string;
       district: string;
+      address?: string;
       products: Product[];
       consignors: string[];
     },
@@ -103,6 +105,7 @@ export const updateCustomer = createAsyncThunk(
         gstin: string;
         taluka: string;
         district: string;
+        address?: string;
         products: Product[];
         consignors: string[];
       };

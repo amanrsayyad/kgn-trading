@@ -97,7 +97,7 @@ export default function InvoicesTable({
               <TableHead>Date</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>From → To</TableHead>
-              <TableHead>LR No</TableHead>
+              <TableHead>Invoice No</TableHead>
               <TableHead>Total Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>

@@ -70,21 +70,21 @@ export default function InvoiceFormDrawer({
     return `INV-${timestamp}-${random}`;
   };
 
-  const generateInvoiceNo = async () => {
-    // Fetch all invoices for the user to determine the next invoice number
+  const generateInvoiceNo = async (appUserId?: string) => {
+    // Fetch invoices filtered by App User to determine the next invoice number
     try {
-      const response = await fetch("/api/invoices");
+      const appUserParam = appUserId && appUserId.trim() !== "" ? appUserId : "null";
+      const response = await fetch(`/api/invoices?appUserId=${appUserParam}`);
       if (response.ok) {
         const data = await response.json();
         const invoices = data.invoices || [];
 
-        // Extract invoice numbers and find the highest
+        // Extract invoice numbers and find the highest in the selected series
         const invoiceNumbers = invoices
           .map((inv: any) => parseInt(inv.invoiceNo, 10))
           .filter((num: number) => !isNaN(num));
 
-        const maxInvoiceNo =
-          invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
+        const maxInvoiceNo = invoiceNumbers.length > 0 ? Math.max(...invoiceNumbers) : 0;
 
         // Increment and format to 4 digits
         const nextInvoiceNo = maxInvoiceNo + 1;
@@ -183,8 +183,8 @@ export default function InvoiceFormDrawer({
         }
       }
     } else {
-      // Generate next invoice number
-      generateInvoiceNo().then((invoiceNo) => {
+      // Generate next invoice number (per App User series)
+      generateInvoiceNo(formData.appUserId).then((invoiceNo) => {
         setFormData((prevData) => ({
           ...prevData,
           invoiceId: generateInvoiceId(),
@@ -598,9 +598,10 @@ export default function InvoiceFormDrawer({
                     <label className="text-sm font-medium">App User</label>
                     <Select
                       value={formData.appUserId}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, appUserId: value })
-                      }
+                      onValueChange={async (value) => {
+                        const nextNo = await generateInvoiceNo(value);
+                        setFormData((prev) => ({ ...prev, appUserId: value, invoiceNo: nextNo }));
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select app user" />

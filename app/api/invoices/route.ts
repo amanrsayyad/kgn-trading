@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
     // Get filter parameters
     const customerId = searchParams.get("customerId");
     const vehicle = searchParams.get("vehicle");
+    const appUserIdParam = searchParams.get("appUserId");
     const fromDate = searchParams.get("fromDate");
     const toDate = searchParams.get("toDate");
 
@@ -52,8 +53,16 @@ export async function GET(request: NextRequest) {
       filter.customerId = customerId;
     }
 
+    if (appUserIdParam) {
+      if (appUserIdParam === "null") {
+        filter.appUserId = null;
+      } else {
+        filter.appUserId = appUserIdParam;
+      }
+    }
+
     console.log("Filter Query:", filter);
-    console.log("Query Params:", { customerId, vehicle, fromDate, toDate });
+    console.log("Query Params:", { customerId, vehicle, fromDate, toDate, appUserIdParam });
 
     if (vehicle) {
       filter["rows.truckNo"] = vehicle;
@@ -87,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch paginated invoices
     const invoices = await Invoice.find(filter)
-      .populate("customerId", "name gstin")
+      .populate("customerId", "name gstin address")
       .populate("appUserId", "name gstin")
       .sort({ date: -1, createdAt: -1 })
       .skip(skip)
@@ -191,6 +200,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Ensure invoice number is unique per App User (including null)
+    const duplicateInvoiceNo = await Invoice.findOne({
+      userId,
+      appUserId,
+      invoiceNo: invoiceData.invoiceNo,
+    });
+
+    if (duplicateInvoiceNo) {
+      return NextResponse.json(
+        { success: false, message: "Invoice number already exists for selected App User" },
+        { status: 400 }
+      );
+    }
+
     // Create invoice with customer/app user names
     const invoice = await Invoice.create({
       ...invoiceData,
@@ -203,7 +226,7 @@ export async function POST(request: NextRequest) {
     });
 
     const populatedInvoice = await Invoice.findById(invoice._id)
-      .populate("customerId", "name gstin")
+      .populate("customerId", "name gstin address")
       .populate("appUserId", "name gstin");
 
     return NextResponse.json(

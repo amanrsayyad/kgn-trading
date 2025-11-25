@@ -195,6 +195,8 @@ InvoiceSchema.index({ userId: 1, date: -1 });
 InvoiceSchema.index({ invoiceId: 1, userId: 1 }, { unique: true });
 InvoiceSchema.index({ customerId: 1 });
 InvoiceSchema.index({ appUserId: 1 });
+// Ensure invoice number series is unique per App User (and user)
+InvoiceSchema.index({ userId: 1, appUserId: 1, invoiceNo: 1 }, { unique: true });
 
 // Delete cached model to ensure schema is updated
 if (mongoose.models.Invoice) {
